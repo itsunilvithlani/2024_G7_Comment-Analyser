@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 const auth = require('./routers/auth.js');
 const comments = require('./routers/comments.js');
+const payment = require('./routers/payment.js');
 const dotenv = require('dotenv');
 const port = 3001;
 
@@ -28,3 +29,4 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use('/auth', auth);
 app.use('/comments',comments);
+app.use('/payment', payment);

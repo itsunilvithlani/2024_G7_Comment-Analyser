@@ -6,6 +6,6 @@ const userSchema = new mongoose.Schema({
   urls: [{ type: mongoose.Schema.Types.ObjectId, ref: 'urls' }]
 });
 
-const User = mongoose.model('user_details',userSchema);
+const User = mongoose.model('users',userSchema);
 
 module.exports = User;

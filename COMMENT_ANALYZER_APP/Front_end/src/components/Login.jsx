@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
 export const Login = () => {
-
   let form_inital = {
     email: "",
     password: "",
@@ -26,15 +25,43 @@ export const Login = () => {
       [e.target.name]: e.target.value,
     });
   };
-  const handleGoogleauth = async (e)=>
-{
-    await loginWithRedirect();
-    console.log(user);
-      console.log("hello world")
-      localStorage.setItem("token", user?.email);
-      history("/");
-  }
-  
+
+  const handleGoogleLogin = async() => {
+    
+   await loginWithRedirect();
+    await fetch("http://localhost:3001/auth/Login", {
+      method: "POST",
+      body: JSON.stringify({
+          email: "Rudrakumar@gmail.com",
+          password: "12345",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          if (data.error === "Please try to Login with correct credentials") {
+            setwarning(true);
+
+            setTimeout(() => {
+              setwarning(false);
+            }, 3000);
+          } else if (data === "Internal Server Error") {
+            console.log("in internal");
+          } else {
+            //save the auth token and redirect
+            localStorage.setItem("token", data.authtoken);
+            history("/");
+          }
+        })
+        .catch((err) => {
+          alert(err);
+        });  
+  };
+
   const handleonSubmit = async (e) => {
     e.preventDefault();
     await fetch("http://localhost:3001/auth/Login", {
@@ -57,8 +84,8 @@ export const Login = () => {
         } else if (data === "Internal Server Error") {
           console.log("in internal");
         } else {
-
           //save the auth token and redirect
+          
           localStorage.setItem("token", data.authtoken);
           history("/");
         }
@@ -67,6 +94,8 @@ export const Login = () => {
         alert(err);
       });
   };
+
+  console.log(user);
 
   return (
     <>
@@ -148,7 +177,7 @@ export const Login = () => {
                     style={{ background: "white", border: "1.5px solid black" }}
                     href="#!"
                     role="button"
-                    onClick={handleGoogleauth}
+                    onClick={handleGoogleLogin}
                   >
                     <i className="fab fa-twitter me-2">
                       <FcGoogle />

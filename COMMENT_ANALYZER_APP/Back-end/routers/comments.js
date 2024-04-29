@@ -10,135 +10,106 @@ const router = express.Router();
 const ObjectId = require('mongoose').Types.ObjectId;
 
 // ROUTE 1: Get all the comments using GET "/comments/getuser" Login required
-router.get('/fetchallcomments', fetchuser, async (req, res) => {
+router.get('/fetchallurls', fetchuser, async (req, res) => {
   try {
-    const comments = await Comments.find({ user: req.user.id });
-    res.json(comments);
-  }
-  catch (e) {
+    // Find the user by user ID
+    const user = await User.findById(req.user.id).populate('urls');
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Extract URLs from the user object
+    const urls = user.urls.map(url => url.url);
+
+    res.json(urls);
+  } catch (e) {
+    console.error(e);
     res.status(500).send("Internal Server Error");
   }
-})
-
+});
 
 router.post('/addcomments', fetchuser, async (req, res) => {
   try {
     // Fetch comments from the API and include the URL in the request body
-    let response;
-    try {
-      response = await axios.post("http://127.0.0.1:5000/get_comments", req.body);
-      console.log(response.data);
-    }
-    catch (error) {
-      console.log(error);
-      console.log("Error", error.message);
-    }
-
+    const response = await axios.post("http://127.0.0.1:5000/get_comments", req.body);
+    console.log(response.data);
     // Find the user by user ID
     const user = await User.findById(req.user.id);
 
+    // Check if the URL exists in the database
+    const existingUrl = await UrlModel.findOne({ url: req.body.videoId });
 
-    let urlDocument;
-    // Check if the URL is already present in the user's URLs
-    const existingUrl = await Promise.all(user.urls.map(async (urlId) => {
-      try {
-        // Find the URL document by ID
-        urlDocument = await UrlModel.findById(urlId);
-        if (urlDocument && urlDocument.url === req.body.videoId) {
-          // URL found and URL matches, return the document
-          return urlDocument;
-        }
-        // URL not found or URL does not match, return null
-        return null;
-      } catch (error) {
-        console.error('Error while finding URL:', error);
-        return null;
+    if (existingUrl) {
+      // URL already exists, check if it belongs to the current user
+      //user add Url id
+      if (existingUrl && !user.urls.includes(existingUrl._id)) {
+        user.urls.push(existingUrl._id);
+        await user.save();
       }
-    }));
+      const isUserUrl = existingUrl.users.some(userId => userId.equals(user._id));
 
-    // Filter out the null values, keeping only the existing URL documents
-    const filteredExistingUrls = existingUrl.filter(url => url);
-
-    // Now, filteredExistingUrls contains only the URL documents that match the target URL
-    if (filteredExistingUrls.length > 0) {
-      // URLs found, do something with the array of matching URL documents
-    } else {
-      // No matching URLs found
-      console.log('No matching URLs found.');
-    }
-
-    if (filteredExistingUrls.length > 0) {
-      // Delete existing comments in the Comments model
-      const deleteCommentPromises = filteredExistingUrls.map(async (existingUrl) => {
+      if (isUserUrl) {
+        // URL belongs to the user, update comments
+        //delete all comments 
         await Comments.deleteMany({ _id: { $in: existingUrl.comments } });
+        // Create new comments and save them
+        const savedComments = await Promise.all(response.data.map(async (commentData) => {
+          const newComment = new Comments(commentData);
+          return await newComment.save();
+        }));
+
+        // Update comments array in the URL model
+        existingUrl.comments = savedComments.map(comment => comment._id);
+        await existingUrl.save();
+        res.send(response.data);
+      } else {
+        // URL does not belong to the user, add the user to the URL's users array
+        existingUrl.users.push(user._id);
+        await existingUrl.save();
+
+        await Comments.deleteMany({ _id: { $in: existingUrl.comments } });
+
+        // Create new comments and save them
+        const savedComments = await Promise.all(response.data.map(async (commentData) => {
+          const newComment = new Comments(commentData);
+          return await newComment.save();
+        }));
+
+        // Update comments array in the URL model
+        existingUrl.comments = savedComments.map(comment => comment._id);
+        await existingUrl.save();
+
+        res.send(response.data);
+      }
+    } else {
+      // URL does not exist, create a new URL and associate it with the user
+      const newUrl = new UrlModel({
+        url: req.body.videoId,
+        comments: [],
+        users: [user._id]
       });
 
-      // Wait for all deletions to finish
-      await Promise.all(deleteCommentPromises);
-
-      // Create new comments and save them to the Comments model
+      // Create new comments and associate them with the URL
       const savedComments = await Promise.all(response.data.map(async (commentData) => {
-        commentData['user'] = req.user.id;
         const newComment = new Comments(commentData);
         return await newComment.save();
       }));
 
-      // Update the comments array in the existing URL documents
-      const updatePromises = filteredExistingUrls.map(async (existingUrl) => {
-        existingUrl.comments = savedComments.map(comment => comment._id);
-        return existingUrl.save();
-      });
-
-      // Wait for all updates to finish
-      await Promise.all(updatePromises);
-
-      // Update the comments array in the UrlModel documents
-      const urlModelUpdatePromises = filteredExistingUrls.map(async (existingUrl) => {
-        const urlModel = await UrlModel.findOneAndUpdate(
-          { _id: existingUrl._id },
-          { comments: existingUrl.comments },
-          { new: true }
-        );
-        return urlModel;
-      });
-
-      // Wait for all UrlModel updates to finish
-      const updatedUrlModels = await Promise.all(urlModelUpdatePromises);
-
-      res.send(response?.data);
-    }
-
-
-    else {
-      // URL does not exist for the user, add new URL
-      const savedComments = await Promise.all(
-        response.data.map(async (comment) => {
-          comment['user'] = req.user.id;
-          const newComment = new Comments(comment);
-          return await newComment.save();
-        })
-      );
-      // console.log(savedComments);
-
-      const newUrl = new UrlModel({
-        url: req.body.videoId,
-        comments: savedComments.map(comment => comment._id)
-      });
-
+      newUrl.comments = savedComments.map(comment => comment._id);
       await newUrl.save();
 
-      user.urls.push(newUrl);
+      // Update user's URLs array
+      user.urls.push(newUrl._id);
       await user.save();
 
       res.send(response.data);
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error:', error.message);
     res.status(500).send('Internal Server Error');
   }
-
 });
-
-
 
 module.exports = router;

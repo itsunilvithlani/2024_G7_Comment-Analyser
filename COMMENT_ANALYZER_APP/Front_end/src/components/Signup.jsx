@@ -30,6 +30,7 @@ function App() {
       })
       .then((data) => {
         if (data.authtoken) {
+          localStorage.setItem("username",form.username);
           localStorage.setItem("token", data.authtoken);
           history("/");
         } else if (data.data == "exists") {

@@ -1,14 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import { MdDarkMode } from "react-icons/md";
 import { MdLightMode } from "react-icons/md";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./Navbar.css"
 import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from 'react-router-dom';
 export const Navbar = () => {
 
 const [mode,setMode] =  useState("light");
 const [login,setlogin] = useState("LoggedIn");
 const { user, loginWithRedirect,isAuthenticated} = useAuth0();
+const  history = useNavigate();
+const location = useLocation()
+
+const userFromLocalStorage = localStorage.getItem('username');
+const user1 = "Rudrakumar"
 
 useEffect(()=>
 {
@@ -39,6 +45,21 @@ useEffect(()=>
   }
 
  }
+ const handleSelect = (e)=>
+ {
+    if(e.target.value === "History")
+    {
+      history("/History");
+    }
+    else if(e.target.value === "Payment")
+    {
+      history("/Payment");
+    }
+    else
+    {
+      history("/");
+    }
+ }
  const handleOnLogin = ()=>
 {
   localStorage.removeItem("token");
@@ -65,6 +86,13 @@ useEffect(()=>
                 <Link to = "/Signup" className="btn signup">Sign up</Link>
 
               <p className="mode" onClick={toggleDarkMode}>{mode === "dark" ?<MdLightMode/> : <MdDarkMode/>}</p>
+                
+               
+              <select style={{marginLeft:"1rem",border:"1px solid black",borderRadius:"5px"}} onChange={handleSelect}>
+                <option value={`${userFromLocalStorage} ? ${userFromLocalStorage} : ${user1} `}>{`${userFromLocalStorage}`}</option>
+                <option value={"History"}>History</option>
+                <option value={"Payment"}>Payment</option>
+              </select>
             </div>
           </div>
         </div>

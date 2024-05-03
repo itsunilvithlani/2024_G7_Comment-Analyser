@@ -11,11 +11,19 @@ const port = 3001;
 
 dotenv.config();
 
-main().catch(err => console.log(err));
-async function main() {
-  await mongoose.connect('mongodb://127.0.0.1/CommentSense');
+// Database configuration
+mongoose.connect(process.env.DB).then(() => {
   console.log('Connected to MongoDB');
-}
+}).catch((err)=>{
+  console.log('Connection Failed',err);
+})
+
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use('/auth', auth);
+app.use('/comments', comments);
+app.use('/payment', payment);
 
 app.get("/", (req, res) => {
   res.send("hello world");
@@ -25,8 +33,3 @@ app.listen(port, () => {
   console.log(`listening on http://localhost:${port}`);
 });
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use('/auth', auth);
-app.use('/comments',comments);
-app.use('/payment', payment);

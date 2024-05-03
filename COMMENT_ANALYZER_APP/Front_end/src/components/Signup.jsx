@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { ImFacebook2 } from "react-icons/im";
 import { useNavigate } from "react-router-dom";
-// import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
   const history = useNavigate();
@@ -13,7 +13,50 @@ function App() {
   };
   const [form, setform] = useState(form1);
   const [warning, setwarning] = useState(false);
-  // const { user,loginWithRedirect } = useAuth0();
+  const { user, loginWithRedirect } = useAuth0();
+
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      history("/");
+    }
+  }, []);
+
+  const handleGoogleLogin = async () => {
+    await fetch("http://localhost:3001/auth/Auth0Login", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "Rudrakumar@gmail.com",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        if (data.error === "Please try to Login with correct credentials") {
+          setwarning(true);
+
+          setTimeout(() => {
+            setwarning(false);
+          }, 3000);
+        } else if (data === "Internal Server Error") {
+          console.log("in internal");
+        } else {
+          //save the auth token and redirect
+          localStorage.setItem("username", data.userabcd);
+          localStorage.setItem("token", data.authtoken);
+          setTimeout(() => {
+            history("/");
+          }, 2000);
+          loginWithRedirect();
+        }
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  };
 
   //handlers
   const handleSignup = async (e) => {
@@ -30,7 +73,7 @@ function App() {
       })
       .then((data) => {
         if (data.authtoken) {
-          localStorage.setItem("username",form.username);
+          localStorage.setItem("username", data.userabcd);
           localStorage.setItem("token", data.authtoken);
           history("/");
         } else if (data.data == "exists") {
@@ -147,7 +190,7 @@ function App() {
                   style={{ background: "white", border: "1.5px solid black" }}
                   href="#!"
                   role="button"
-                  // onClick={(e) => loginWithRedirect()}
+                  onClick={handleGoogleLogin}
                 >
                   <i className="fab fa-twitter me-2">
                     <FcGoogle />
@@ -160,6 +203,7 @@ function App() {
                   style={{ background: "#3b5998" }}
                   href="#!"
                   role="button"
+                  onClick={handleGoogleLogin}
                 >
                   <i className="fab fa-facebook-f me-2">
                     <ImFacebook2 />

@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { Comments } from "./Comments";
 
 import { LoadingSpinner } from "./LodingSpinner";
 import "./Searchbar.css";
-import {SentimentChart} from "./SentimentChart";
+import { SentimentChart } from "./SentimentChart";
 
 // className="search_bar d-flex justify-content-center"
 export const Searchbar = () => {
@@ -12,7 +12,16 @@ export const Searchbar = () => {
   const [fetching, setFetching] = useState(false);
   const [Comment, setComment] = useState(false);
   const [comments, setComments] = useState([]);
+  const [displayButton, setDisplayButton] = useState(false);
   const [option, setOption] = useState("All");
+
+  // useEffect(() => {
+  //   if (localStorage.getItem("rzp_device_id")) {
+  //     setDisplayButton(true);
+  //   } else {
+  //     setDisplayButton(false);
+  //   }
+  // }, [localStorage.getItem("rzp_device_id")]);
 
   let positiveCount = 0;
   let negativeCount = 0;
@@ -79,6 +88,63 @@ export const Searchbar = () => {
       setFetching(false);
       console.error("There was a problem with your fetch operation:", error);
     }
+
+    // if (displayButton) {
+    //   // node --version # Should be >= 18
+    //   // npm install @google/generative-ai
+
+    //   const {
+    //     GoogleGenerativeAI,
+    //     HarmCategory,
+    //     HarmBlockThreshold,
+    //   } = require("@google/generative-ai");
+
+    //   const MODEL_NAME = "gemini-1.5-pro-latest";
+    //   const API_KEY = "AIzaSyCfKuk2qFxV_VKlnwrO72T2JBG063fJLKQ";
+
+    //   async function runChat() {
+    //     const genAI = new GoogleGenerativeAI(API_KEY);
+    //     const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+
+    //     const generationConfig = {
+    //       temperature: 1,
+    //       topK: 0,
+    //       topP: 0.95,
+    //       maxOutputTokens: 8192,
+    //     };
+
+    //     const safetySettings = [
+    //       {
+    //         category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    //         threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    //       },
+    //       {
+    //         category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    //         threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    //       },
+    //       {
+    //         category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    //         threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    //       },
+    //       {
+    //         category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    //         threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    //       },
+    //     ];
+
+    //     const chat = model.startChat({
+    //       generationConfig,
+    //       safetySettings,
+    //       history: [],
+    //     });
+
+    //     const result = await chat.sendMessage("hi");
+    //     const response = result.response;
+    //     console.log(response.text());
+    //   }
+
+    //   runChat();
+    // }
   };
 
   return (
@@ -95,6 +161,7 @@ export const Searchbar = () => {
             height: "38px",
             paddingLeft: "15px",
             paddingRight: "10px",
+            border: "1px solid black",
           }}
           className="rounded-start-4 hover-effect text_input"
           onChange={handleUrlChange}
@@ -111,6 +178,7 @@ export const Searchbar = () => {
           value={option}
           onChange={handleOptionChange}
           className="select"
+          style={{ border: "1px solid black" }}
         >
           <option value="All" className="option">
             All
@@ -125,9 +193,19 @@ export const Searchbar = () => {
             Neutral
           </option>
         </select>
-
+        <button
+          className="AI-Button"
+          style={{ display: displayButton ? "block" : "none" }}
+        >
+          Analyze with AI
+        </button>
       </div>
-        <SentimentChart positive={positiveCount} negative={negativeCount} neutral={neutralCount} data={Comment}></SentimentChart>
+      <SentimentChart
+        positive={positiveCount}
+        negative={negativeCount}
+        neutral={neutralCount}
+        data={Comment}
+      ></SentimentChart>
       {!fetching && !Comment ? (
         ""
       ) : fetching ? (
@@ -145,7 +223,7 @@ export const Searchbar = () => {
             }}
           >
             <Comments data={comments} options={option}></Comments>
-          </div>   
+          </div>
         </div>
       ) : (
         // Default condition: Display "Loading comments..." if none of the above conditions are met

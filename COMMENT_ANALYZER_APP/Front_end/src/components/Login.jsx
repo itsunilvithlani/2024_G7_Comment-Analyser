@@ -26,14 +26,12 @@ export const Login = () => {
     });
   };
 
-  const handleGoogleLogin = async() => {
-    
-   await loginWithRedirect();
-    await fetch("http://localhost:3001/auth/Login", {
+  const handleGoogleLogin = async() => {  
+   
+    await fetch("http://localhost:3001/auth/Auth0Login", {
       method: "POST",
       body: JSON.stringify({
           email: "Rudrakumar@gmail.com",
-          password: "12345",
         }),
         headers: {
           "Content-Type": "application/json",
@@ -53,8 +51,12 @@ export const Login = () => {
             console.log("in internal");
           } else {
             //save the auth token and redirect
+            localStorage.setItem("username",data.userabcd)   
             localStorage.setItem("token", data.authtoken);
-            history("/");
+            setTimeout(() => {
+              history("/");
+            }, 2000);
+            loginWithRedirect();
           }
         })
         .catch((err) => {
@@ -85,7 +87,7 @@ export const Login = () => {
           console.log("in internal");
         } else {
           //save the auth token and redirect
-          
+          localStorage.setItem("username",data.userabcd)    
           localStorage.setItem("token", data.authtoken);
           history("/");
         }
@@ -190,6 +192,7 @@ export const Login = () => {
                     style={{ background: "#3b5998" }}
                     href="#!"
                     role="button"
+                    onClick={handleGoogleLogin}
                   >
                     <i className="fab fa-facebook-f me-2">
                       <ImFacebook2 />

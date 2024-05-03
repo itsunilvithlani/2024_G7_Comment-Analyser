@@ -12,7 +12,7 @@ export const Bodyarea = () => {
 
   useEffect(() => {
     console.log("in bodyarea")
-    if (!localStorage.getItem("token")) {
+    if (!localStorage.getItem("token") && !localStorage.getItem("username")) {
       history("/Login");
     }
   },[]);

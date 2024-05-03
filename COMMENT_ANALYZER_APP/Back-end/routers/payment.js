@@ -13,12 +13,6 @@ app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({extended:true}));
 
-// main().catch(err => console.log(err));
-// async function main() {
-//   await mongoose.connect('mongodb://127.0.0.1/razorpayment');
-//   console.log('Connected to MongoDB');
-// }
-
 const instance = new razorpay({
     key_id:process.env.KEY,
     key_secret:process.env.SECRET,
@@ -67,7 +61,7 @@ router.post("/paymentverification",async(req,res)=>{
     await Payment.create({
         razorpay_order_id,razorpay_payment_id,razorpay_signature 
     })
-    res.redirect(`http://localhost:5173/paymentsuccess?reference=${razorpay_payment_id}`)
+    res.redirect(`http://localhost:5173/?reference=${razorpay_payment_id}`)
    }
    else{
     res.redirect(`http://localhost:5173`)

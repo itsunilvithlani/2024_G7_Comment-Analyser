@@ -50,7 +50,8 @@ router.post('/signup', [
     user.password = secPass;
     user.username = req.body.username;
     doc = await user.save();
-
+    
+    const userabcd = req.body.username;
     //JWT Token 
     const data = {
       user: {
@@ -58,7 +59,7 @@ router.post('/signup', [
       }
     }
     const authtoken = jwt.sign(data, JWT_SECRET);
-    res.json({ authtoken });
+    res.json({ authtoken,userabcd});
   }
   catch (e) {
     res.status(500).send("Internal Server Error");
@@ -102,7 +103,47 @@ router.post("/Login", [
       }
     }
     const authtoken = jwt.sign(data, JWT_SECRET);
-    res.json({ authtoken });
+    const username = await User.findOne({email});
+    const userabcd = username?.username;
+    res.json({ authtoken , userabcd});
+
+  }
+  catch (e) {
+    res.status(500).send("Internal Server Error");
+  }
+
+})
+
+// For Google or Facebook authentication login
+router.post("/Auth0Login", [
+  body('email', 'Enter a valid email').isEmail(),
+], async (req, res) => {
+
+  //Validations
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: "Please try to Login with correct credentials" });
+  }
+  
+  const { email} = req.body;
+
+  try {
+    //User already logged in or not
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ error: "Please try to Login with correct credentials" });
+    }
+
+    //jwt validation
+    const data = {
+      user: {
+        id: user._id,
+      }
+    }
+    const authtoken = jwt.sign(data, JWT_SECRET);
+    const username = await User.findOne({email});
+    const userabcd = username?.username;
+    res.json({ authtoken , userabcd});
 
   }
   catch (e) {
@@ -117,7 +158,7 @@ router.post("/getuser", fetchuser, async (req, res) => {
 
     const userId = req.user.id;
     const user = await User.findById(userId).select("-password");
-    res.send(user);
+    res.send(user?.username);
   }
   catch (error) {
     res.status(500).send("Internal Server Error");

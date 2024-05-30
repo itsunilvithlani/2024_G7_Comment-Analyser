@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { BrowserRouter as Router } from "react-router-dom";
-import { Bodyarea } from "../src/components/Bodyarea.jsx";
 import { Login } from "./components/Login.jsx";
 import { History } from "../src/components/History.jsx";
 import Signup from "./components/Signup.jsx";
@@ -14,18 +13,19 @@ import AnalysisWithAi from "./components/AnalysisWithAi.jsx";
 import { Provider } from "react-redux";
 import store from "./store/Store.js";
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { BodyArea } from "./components/BodyArea.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { path: "/", element: <Bodyarea /> },
+      { path: "/", element: <BodyArea /> },
       { path: "/Login", element: <Login /> },
       { path: "/Signup", element: <Signup /> },
       { path: "/History", element: <History /> },
       { path: "/payment", element: <Payment /> },
-      { path: "/paymentsuccess", element: <Bodyarea /> },
+      { path: "/paymentsuccess", element: <BodyArea /> },
       {path:"/AnalysisWithAi",element: <AnalysisWithAi/> }
     ],
   },

@@ -6,7 +6,7 @@ import "./Footer.css";
 import { useNavigate } from "react-router-dom";
 // import { useAuth0 } from "@auth0/auth0-react";
 
-export const Bodyarea = () => {
+export const BodyArea = () => {
   const history = useNavigate();
   // const { user, loginWithRedirect,isAuthenticated} = useAuth0();
 

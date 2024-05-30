@@ -2,7 +2,7 @@ import React from 'react'
 import './App.css'
 import { Navbar } from './components/Navbar'
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Bodyarea } from './components/Bodyarea';
+import { BodyArea } from './components/BodyArea';
 import { Footer } from './components/Footer';
 import { Login } from './components/Login';
 import { Outlet } from 'react-router-dom';

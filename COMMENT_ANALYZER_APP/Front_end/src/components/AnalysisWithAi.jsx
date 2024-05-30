@@ -21,7 +21,7 @@ function AnalysisWithAi() {
       }
     };
     AnalysisUsingAi();
-  }, []); // Add data as a dependency to useEffect
+  }, [Data]); // Add data as a dependency to useEffect
 
   useEffect(()=>
   {

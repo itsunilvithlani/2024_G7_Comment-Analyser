@@ -49,6 +49,8 @@ export const Navbar = () => {
   const handleOnLogin = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("username");
+    
+    localStorage.removeItem('rzp_device_id');
     setusername("Account");
     setlogin("LoggedIn");
   };

@@ -1,27 +1,39 @@
 import React, { useEffect, useRef, useState } from "react";
 import "../App.css";
 import { Comments } from "./Comments";
-
+import { useDispatch } from 'react-redux';
+import {add} from "../store/CommentSlice"
 import { LoadingSpinner } from "./LodingSpinner";
 import "./Searchbar.css";
 import { SentimentChart } from "./SentimentChart";
+import { Link, useNavigate } from "react-router-dom";
 
 // className="search_bar d-flex justify-content-center"
 export const Searchbar = () => {
   const [fucUrl, setUrl] = useState("");
+  const history = useNavigate()
   const [fetching, setFetching] = useState(false);
   const [Comment, setComment] = useState(false);
   const [comments, setComments] = useState([]);
   const [displayButton, setDisplayButton] = useState(false);
   const [option, setOption] = useState("All");
+  const dispatch = useDispatch();
+  const negComments = [];
 
-  // useEffect(() => {
-  //   if (localStorage.getItem("rzp_device_id")) {
-  //     setDisplayButton(true);
-  //   } else {
-  //     setDisplayButton(false);
-  //   }
-  // }, [localStorage.getItem("rzp_device_id")]);
+  useEffect(() => {
+    if (localStorage.getItem("rzp_device_id")) {
+      setDisplayButton(true);
+    } else {
+      setDisplayButton(false);
+    }
+  }, [localStorage.getItem("rzp_device_id")]);
+
+  const handleAnalysisUsingAI = (e)=>
+  {
+    e.preventDefault();
+    history('AnalysisWithAi');
+
+  }
 
   let positiveCount = 0;
   let negativeCount = 0;
@@ -32,7 +44,7 @@ export const Searchbar = () => {
       case 1:
         positiveCount++;
         break;
-      case -1:
+        case -1:
         negativeCount++;
         break;
       case 0:
@@ -41,7 +53,17 @@ export const Searchbar = () => {
       default:
         break;
     }
-  });
+  }
+);
+
+  comments.forEach(c =>{
+    if(c.sentiment === -1)
+      {
+        negComments.push(c.comment);
+      }
+  })
+  dispatch(add(negComments));
+  console.log(negComments);
 
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
@@ -139,8 +161,9 @@ export const Searchbar = () => {
         <button
           className="AI-Button"
           style={{ display: displayButton ? "block" : "none" }}
+          onClick={handleAnalysisUsingAI}
         >
-          Analyze with AI
+        Analysis Using AI
         </button>
       </div>
       <SentimentChart

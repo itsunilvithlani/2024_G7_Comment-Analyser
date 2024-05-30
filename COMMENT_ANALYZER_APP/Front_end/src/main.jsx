@@ -10,6 +10,10 @@ import Signup from "./components/Signup.jsx";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { ChakraProvider } from "@chakra-ui/react";
 import Payment from "./components/Payment.jsx";
+import AnalysisWithAi from "./components/AnalysisWithAi.jsx";
+import { Provider } from "react-redux";
+import store from "./store/Store.js";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +26,7 @@ const router = createBrowserRouter([
       { path: "/History", element: <History /> },
       { path: "/payment", element: <Payment /> },
       { path: "/paymentsuccess", element: <Bodyarea /> },
+      {path:"/AnalysisWithAi",element: <AnalysisWithAi/> }
     ],
   },
 ]);
@@ -29,17 +34,21 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ChakraProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.GoogleClient}>
       <Auth0Provider
-        domain="dev-zji640lby6lh7gyi.us.auth0.com"
-        clientId="RT558RVQll6AQMy2PEhT39FU1b9qPi7S"
+        domain={import.meta.env.Domain}
+        clientId= {import.meta.env.ClientId}
         authorizationParams={{
           redirect_uri: window.location.origin,
         }}
       >
+        <Provider store={store}>
         <RouterProvider router={router}>
           <App />
         </RouterProvider>
+        </Provider>
       </Auth0Provider>
+      </GoogleOAuthProvider>
     </ChakraProvider>
   </React.StrictMode>
 );

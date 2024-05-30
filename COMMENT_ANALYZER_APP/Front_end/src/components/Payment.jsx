@@ -4,10 +4,6 @@ import Card from "./Card";
 import axios from "axios";
 
 const Payment = () => {
-  useEffect(() => {
-    checkouthandler();
-  }, []);
-
   const checkouthandler = async (amount) => {
     const {
       data: { key },
@@ -20,14 +16,14 @@ const Payment = () => {
       key,
       amount: order.amount,
       currency: "INR",
-      name: `${localStorage.getItem("username")}`,
+      name: 'CommentSense',
       description: "Razorpay",
       image:
         "https://avatars.githubusercontent.com/u/133936044?s=400&u=e7eb26da0874714a82280267208ef26cd98536b9&v=4",
       order_id: order.id,
       callback_url: "http://localhost:3001/payment/paymentverification",
       prefill: {
-        name: `${localStorage.getItem("username")}`,
+        name: 'CommentSense',
         email: "rudrapatel2992003@gmail.com",
         contact: "1234567890",
       },
@@ -51,7 +47,7 @@ const Payment = () => {
           direction={["column", "row"]}
         >
           <Card
-            amount={200}
+            amount={299}
             img={
               "/logo.png"
             }

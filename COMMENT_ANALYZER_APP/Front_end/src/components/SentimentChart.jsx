@@ -10,9 +10,9 @@ export const SentimentChart = ({ positive, negative, neutral, data }) => {
     <>
       {data && (
         <ul style={{marginLeft:"1.5rem"}}>
-          <li style={{color:"green"}}>{positivePercentage}%</li>
-          <li style={{color:"red"}}>{negativePercentage}%</li>
-          <li>{neutralPercentage}%</li>
+          <li style={{color:"green"}}>{positivePercentage}%  <span>Positive</span></li>
+          <li style={{color:"red"}}>{negativePercentage}%  <span>Negative</span></li>
+          <li>{neutralPercentage}%  <span>Neutral</span></li>
         </ul>
       )}
     </>

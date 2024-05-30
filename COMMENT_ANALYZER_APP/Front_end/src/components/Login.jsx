@@ -6,12 +6,16 @@ import { ImFacebook2 } from "react-icons/im";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
+import {GoogleLogin} from 'react-google-login';
+import {gapi} from "gapi-script";
+import { Logingoogle } from "./Logingoogle"
 
 export const Login = () => {
   let form_inital = {
     email: "",
     password: "",
   };
+
   const [form, setform] = useState(form_inital);
   const [warning, setwarning] = useState(false);
   const { user, loginWithRedirect } = useAuth0();
@@ -26,8 +30,18 @@ export const Login = () => {
     });
   };
 
-  const handleGoogleLogin = async() => {  
-   
+  useEffect(()=>
+  {
+    function start(){
+      gapi.client.init({
+        clientId:import.meta.env.GoogleClient,
+        scope:""
+      })
+    };
+    gapi.load('client:auth2',start);
+  },[]);
+
+  const handleGoogleLogin = async(res) => {  
     await fetch("http://localhost:3001/auth/Auth0Login", {
       method: "POST",
       body: JSON.stringify({
@@ -174,19 +188,7 @@ export const Login = () => {
                   <p className="text-center fw-bold mx-3 mb-0 ">OR</p>
                 </div>
                 <div className="signbutton">
-                  <a
-                    className="btn btn-Light btn-md btn-block Auth"
-                    style={{ background: "white", border: "1.5px solid black" }}
-                    href="#!"
-                    role="button"
-                    onClick={handleGoogleLogin}
-                  >
-                    <i className="fab fa-twitter me-2">
-                      <FcGoogle />
-                    </i>
-                    Continue with Google
-                  </a>
-
+                  <Logingoogle/>
                   <a
                     className="btn btn-primary btn-md btn-block"
                     style={{ background: "#3b5998" }}
